@@ -1,24 +1,48 @@
 import { format } from "date-fns/esm";
-import React from "react";
+import React, { useContext } from "react";
+import toast from "react-hot-toast";
+import { AuthContext } from "../AuthProvider/AuthProvider";
 
-const BookingModal = ({ treatment, setTreatment, selected }) => {
+const BookingModal = ({ treatment, setTreatment, selected, refetch }) => {
+  const { user } = useContext(AuthContext);
   const { name, slots } = treatment;
   const date = format(selected, "PP");
+  const treatmentName = name;
   const handleModalInput = (event) => {
     event.preventDefault();
     const form = event.target;
     const date = form.date.value;
     const name = form.name.value;
     const email = form.email.value;
+    const slot = form.slot.value;
     const phone = form.phone.value;
     const patientData = {
+      treatmentName,
       patient: name,
       date,
       email,
       phone,
+      slot,
     };
-    console.log(patientData);
-    setTreatment(null);
+    console.log(slot);
+    //
+    fetch(`http://localhost:5000/bookings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(patientData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.acknowledged) {
+          toast.success("Booking added..!");
+          setTreatment(null);
+          refetch();
+        } else {
+          toast.error(data.message);
+        }
+      });
   };
   return (
     <>
@@ -43,7 +67,7 @@ const BookingModal = ({ treatment, setTreatment, selected }) => {
             />
 
             {/* select date option */}
-            <select className="select select-bordered w-full ">
+            <select name="slot" className="select select-bordered w-full ">
               {slots.map((slot) => (
                 <option value={slot} selected>
                   {slot}
@@ -52,12 +76,15 @@ const BookingModal = ({ treatment, setTreatment, selected }) => {
             </select>
             <input
               name="name"
+              defaultValue={user?.displayName}
               type="text"
               placeholder="Full name"
               className=" input-bordered my-3 input w-full "
             />
             <input
+              disabled
               name="email"
+              defaultValue={user?.email}
               type="email"
               placeholder="Email address"
               className=" input-bordered my-3 input w-full "

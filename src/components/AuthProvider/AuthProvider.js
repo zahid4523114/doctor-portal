@@ -21,16 +21,19 @@ const AuthProvider = ({ children }) => {
 
   //create user
   const userRegister = (email, password) => {
+    setLoader(true);
     return createUserWithEmailAndPassword(auth, email, password);
   };
 
   //login user
   const userLogin = (email, password) => {
+    setLoader(true);
     return signInWithEmailAndPassword(auth, email, password);
   };
 
   //sign in with google
   const loginWithGoogle = () => {
+    setLoader(true);
     return signInWithPopup(auth, googleProvider);
   };
 
@@ -45,10 +48,12 @@ const AuthProvider = ({ children }) => {
 
   //reset email
   const userPasswordReset = (email) => {
+    setLoader(true);
     return sendPasswordResetEmail(auth, email);
   };
   //user sign out
   const userSignOut = () => {
+    setLoader(true);
     return signOut(auth);
   };
   const authInfo = {

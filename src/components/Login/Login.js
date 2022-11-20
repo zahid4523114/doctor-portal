@@ -1,13 +1,27 @@
 import React, { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import ButtonFull from "../BtnFull/ButtonFull";
 import { FcGoogle } from "react-icons/fc";
 import { AuthContext } from "../AuthProvider/AuthProvider";
+import UserToken from "../UseToken/UseToken";
 
 const Login = () => {
-  const { userLogin, loginWithGoogle, userPasswordReset } =
+  const { userLogin, user, loginWithGoogle, userPasswordReset } =
     useContext(AuthContext);
+  // const [userEmail, setUserEmail] = useState("");
+
+  const [token] = UserToken(user?.email);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+
+  if (token) {
+    console.log(token);
+    navigate(from, { replace: true });
+  }
+
   const {
     register,
     handleSubmit,
@@ -23,11 +37,13 @@ const Login = () => {
       .then((result) => {
         const user = result.user;
         console.log(user);
+        // setUserEmail(email);
       })
       .catch((error) => {
         console.log(error);
       });
   };
+  // console.log(loginUserEmail, token);
   //
   const [email, setEmail] = useState("");
 

@@ -1,12 +1,26 @@
-import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import ButtonFull from "../BtnFull/ButtonFull";
 import { AuthContext } from "../AuthProvider/AuthProvider";
 import { FcGoogle } from "react-icons/fc";
+import toast from "react-hot-toast";
+import UserToken from "../UseToken/UseToken";
 
 const Register = () => {
   const { userRegister, loginWithGoogle } = useContext(AuthContext);
+
+  const [createdEmail, setCreatedEmail] = useState("");
+
+  const [token] = UserToken(createdEmail);
+
+  const navigate = useNavigate();
+
+  if (token) {
+    console.log(token);
+    navigate("/");
+  }
+
   const {
     register,
     handleSubmit,
@@ -16,14 +30,37 @@ const Register = () => {
   const handleRegister = (data) => {
     const email = data.email;
     const password = data.password;
-    //
+    const name = data.name;
+    console.log(email);
+    //register user
     userRegister(email, password)
       .then((result) => {
         const user = result.user;
         console.log(user);
+        createUser(email, name);
       })
       .catch((error) => {
         console.log(error);
+      });
+  };
+
+  //send user data to db
+  const createUser = (email, name) => {
+    const userData = { email, name };
+    fetch("http://localhost:5000/usersInfo", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.acknowledged) {
+          toast.success("user added successfully");
+          setCreatedEmail(email);
+        }
+        console.log(data);
       });
   };
 
